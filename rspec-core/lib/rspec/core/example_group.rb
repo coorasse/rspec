@@ -693,20 +693,21 @@ module RSpec
         ivars.each { |name, value| instance.instance_variable_set(name, value) }
       end
 
+      # @private
+      # Instance variables which belong to a single example group instance and
+      # must never be shared from `before(:context)` hooks with examples.
       if RUBY_VERSION.to_f < 1.9
         # :nocov:
-        # @private
-        INSTANCE_VARIABLE_TO_IGNORE = '@__inspect_output'.freeze
+        INSTANCE_SPECIFIC_IVARS = ['@__inspect_output', '@__memoized'].freeze
         # :nocov:
       else
-        # @private
-        INSTANCE_VARIABLE_TO_IGNORE = :@__inspect_output
+        INSTANCE_SPECIFIC_IVARS = [:@__inspect_output, :@__memoized].freeze
       end
 
       # @private
       def self.each_instance_variable_for_example(group)
         group.instance_variables.each do |ivar|
-          yield ivar unless ivar == INSTANCE_VARIABLE_TO_IGNORE
+          yield ivar unless INSTANCE_SPECIFIC_IVARS.include?(ivar)
         end
       end
 
